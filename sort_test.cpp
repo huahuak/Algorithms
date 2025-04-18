@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <random>
+#include <utility>
 #include <vector>
 
 class Heap {
@@ -60,8 +62,8 @@ class Heap {
 };
 
 // Demonstrate some basic assertions.
-TEST(HeapTest, Sort) {
-  int N = 10;
+TEST(Sort, HeapSort) {
+  int N = 10000;
   std::vector<int> arr(N, 0);
   for (int i = 0; i < N; ++i) {
     arr[i] = std::rand();
@@ -72,4 +74,42 @@ TEST(HeapTest, Sort) {
   auto ans = hp.sort();
   std::sort(arr.begin(), arr.end());
   EXPECT_EQ(arr, ans);
+}
+
+// arr is [start, end)
+void quickSort(int *arr, int start, int end) {
+  if (end - start < 2) {
+    return;
+  }
+  int pivot = arr[start];
+  int lhs = start;
+  int rhs = end - 1;
+  while (lhs < rhs) {
+    while (lhs < rhs && arr[lhs] <= pivot) {
+      lhs++;
+    }
+    while (rhs > lhs && arr[rhs] > pivot) {
+      rhs--;
+    }
+    std::swap(arr[lhs], arr[rhs]);
+  }
+  if (arr[lhs] < arr[start]) {
+    std::swap(arr[lhs], arr[start]);
+  }
+  quickSort(arr, start, lhs);
+  quickSort(arr, lhs, end);
+}
+
+TEST(Sort, QuickSort) {
+  int N = 10000;
+  std::vector<int> arr(N, 0);
+  for (int i = 0; i < N; ++i) {
+    arr[i] = std::rand();
+  }
+  std::vector<int> cpy(N, 0);
+  std::copy(arr.begin(), arr.end(), cpy.begin());
+
+  quickSort(arr.data(), 0, arr.size());
+  std::sort(cpy.begin(), cpy.end());
+  EXPECT_EQ(cpy, arr);
 }
