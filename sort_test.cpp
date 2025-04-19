@@ -1,4 +1,5 @@
 #include <_stdlib.h>
+#include <alloca.h>
 #include <gtest/gtest.h>
 
 #include <algorithm>
@@ -11,7 +12,7 @@ void testSortMethod(std::function<void(std::vector<int> &)> sortFn) {
   const int N = 10000;
   std::vector<int> arr(N, 0);
   for (int i = 0; i < arr.size(); ++i) {
-    arr[i] = rand();
+    arr[i] = rand() % 100;
   }
   std::vector<int> cpy(arr);
   sortFn(cpy);
@@ -128,4 +129,47 @@ TEST(Sort, QuickSort) {
   });
 }
 
-void mergeSort(int *arr, int start, int end) {}
+void mergeSort(int *arr, int start, int end) {
+  if (end - start < 2) {
+    return;
+  }
+  if (end - start == 2) {
+    if (arr[start] > arr[end - 1]) {
+      std::swap(arr[start], arr[end - 1]);
+    }
+    return;
+  }
+  int mid = (start + end) >> 1;
+  mergeSort(arr, start, mid);
+  mergeSort(arr, mid, end);
+  int lhs = start;
+  int rhs = mid;
+  int *tmp = (int *)alloca(sizeof(int) * (end - start));
+  for (int i = 0; i < end - start; ++i) {
+    if (lhs < mid && rhs < end) {
+      if (arr[lhs] < arr[rhs]) {
+        tmp[i] = arr[lhs];
+        ++lhs;
+      } else {
+        tmp[i] = arr[rhs];
+        ++rhs;
+      }
+    } else if (lhs < mid) {
+      tmp[i] = arr[lhs];
+      ++lhs;
+    } else if (rhs < end) {
+      tmp[i] = arr[rhs];
+      ++rhs;
+    }
+  }
+  for (int i = 0; i < end - start; ++i) {
+    arr[start + i] = tmp[i];
+  }
+}
+
+TEST(Sort, MergeSort) {
+  testSortMethod([](std::vector<int> &arr) {
+    // call merge sort
+    mergeSort(arr.data(), 0, arr.size());
+  });
+}
