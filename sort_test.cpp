@@ -1,40 +1,61 @@
+#include <_stdlib.h>
 #include <gtest/gtest.h>
 
 #include <algorithm>
 #include <cstdlib>
-#include <random>
+#include <functional>
 #include <utility>
 #include <vector>
 
+void testSortMethod(std::function<void(std::vector<int> &)> sortFn) {
+  const int N = 10000;
+  std::vector<int> arr(N, 0);
+  for (int i = 0; i < arr.size(); ++i) {
+    arr[i] = rand();
+  }
+  std::vector<int> cpy(arr);
+  sortFn(cpy);
+  std::sort(arr.begin(), arr.end());
+  EXPECT_EQ(arr, cpy);
+}
+
 class Heap {
  public:
-  Heap(int *arr, int n) { this->arr = std::vector<int>(arr, arr + n); }
-
-  std::vector<int> sort() {
-    std::vector<int> ans;
-    while (!arr.empty()) {
-      std::swap(arr[0], arr.back());
-      ans.push_back(arr.back());
-      arr.pop_back();
-      sink(0);
-    }
-    return ans;
+  explicit Heap(std::vector<int> &arr) {
+    this->arr = arr.data();
+    this->size = arr.size();
+    heapify();
   }
 
+  static void sort(std::vector<int> &arr) {
+    Heap h(arr);
+    for (int i = arr.size() - 1; i >= 0; --i) {
+      std::swap(arr[0], arr[i]);
+      h.sink(0, 0, i);
+    }
+    int lhs = 0;
+    int rhs = arr.size() - 1;
+    while (lhs < rhs) {
+      std::swap(arr[lhs], arr[rhs]);
+      ++lhs;
+      --rhs;
+    }
+  };
+
   void heapify() {
-    for (int i = (arr.size() - 1) / 2; i >= 0; --i) {
-      sink(i);
+    for (int i = (size - 1) / 2; i >= 0; --i) {
+      sink(i, 0, size);
     }
   }
 
  private:
-  void sink(int pos) {
-    while (pos < arr.size()) {
+  void sink(int pos, int start, int end) {
+    while (pos < end) {
       int child = pos * 2 + 1;
-      if (child >= arr.size()) {
+      if (child >= end) {
         return;
       }
-      if ((child + 1) < arr.size() && arr[child + 1] < arr[child]) {
+      if ((child + 1) < end && arr[child + 1] < arr[child]) {
         child += 1;
       }
       if (arr[child] < arr[pos]) {
@@ -44,36 +65,33 @@ class Heap {
       }
       pos = child;
     }
-    std::vector<int> arr;
   }
 
-  void swim(int pos) {
-    while (pos > 0) {
+  void swim(int pos, int start, int end) {
+    while (pos > start) {
       int parent = pos / 2;
+      if (parent < start) {
+        break;
+      }
       if (arr[parent] > arr[pos]) {
         std::swap(arr[parent], arr[pos]);
       } else {
-        return;
+        break;
       }
+      pos = parent;
     }
   }
 
-  std::vector<int> arr;
+  int *arr;
+  int size;
 };
 
 // Demonstrate some basic assertions.
 TEST(Sort, HeapSort) {
-  int N = 10000;
-  std::vector<int> arr(N, 0);
-  for (int i = 0; i < N; ++i) {
-    arr[i] = std::rand();
-  }
-
-  Heap hp(arr.data(), arr.size());
-  hp.heapify();
-  auto ans = hp.sort();
-  std::sort(arr.begin(), arr.end());
-  EXPECT_EQ(arr, ans);
+  testSortMethod([](std::vector<int> &arr) {
+    // heap sort
+    Heap::sort(arr);
+  });
 }
 
 // arr is [start, end)
@@ -104,15 +122,10 @@ void quickSort(int *arr, int start, int end) {
 }
 
 TEST(Sort, QuickSort) {
-  int N = 10000;
-  std::vector<int> arr(N, 0);
-  for (int i = 0; i < N; ++i) {
-    arr[i] = std::rand();
-  }
-  std::vector<int> cpy(N, 0);
-  std::copy(arr.begin(), arr.end(), cpy.begin());
-
-  quickSort(arr.data(), 0, arr.size());
-  std::sort(cpy.begin(), cpy.end());
-  EXPECT_EQ(cpy, arr);
+  testSortMethod([](std::vector<int> &arr) {
+    // call quick sort
+    quickSort(arr.data(), 0, arr.size());
+  });
 }
+
+void mergeSort(int *arr, int start, int end) {}
