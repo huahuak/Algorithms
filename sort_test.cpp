@@ -171,3 +171,24 @@ TEST(Sort, MergeSort) {
     mergeSort(arr.data(), 0, arr.size());
   });
 }
+
+// selectSort
+// using swap to implement selectSort, this leads to unsatable sort.
+void selectSort(int *arr, int start, int end) {
+  for (int i = start; i < end; ++i) {
+    int idx = i;
+    for (int j = i; j < end; ++j) {
+      if (arr[j] < arr[idx]) {
+        idx = j;
+      }
+    }
+    std::swap(arr[i], arr[idx]);
+  }
+}
+
+TEST(Sort, SelectSort) {
+  testSortMethod([](std::vector<int> &arr) {
+    // select sort
+    selectSort(arr.data(), 0, arr.size());
+  });
+}
