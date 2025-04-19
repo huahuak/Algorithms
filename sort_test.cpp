@@ -95,9 +95,12 @@ void quickSort(int *arr, int start, int end) {
   }
   if (arr[lhs] < arr[start]) {
     std::swap(arr[lhs], arr[start]);
+  } else {
+    --lhs;
+    std::swap(arr[lhs], arr[start]);
   }
   quickSort(arr, start, lhs);
-  quickSort(arr, lhs, end);
+  quickSort(arr, lhs + 1, end);
 }
 
 TEST(Sort, QuickSort) {

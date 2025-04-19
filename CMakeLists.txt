@@ -20,6 +20,7 @@ include(CTest)
 enable_testing()
 
 add_executable(algorithms_test 
+    search_test.cpp
     sort_test.cpp
 )
 add_compile_options("-g")
