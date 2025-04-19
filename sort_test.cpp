@@ -112,12 +112,10 @@ void quickSort(int *arr, int start, int end) {
     }
     std::swap(arr[lhs], arr[rhs]);
   }
-  if (arr[lhs] < arr[start]) {
-    std::swap(arr[lhs], arr[start]);
-  } else {
+  if (arr[lhs] > arr[start]) {
     --lhs;
-    std::swap(arr[lhs], arr[start]);
   }
+  std::swap(arr[lhs], arr[start]);
   quickSort(arr, start, lhs);
   quickSort(arr, lhs + 1, end);
 }
